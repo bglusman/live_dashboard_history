@@ -11,7 +11,8 @@ defmodule LiveDashboardHistory.Application do
       %{
         id: HistorySupervisor,
         start: {HistorySupervisor, :start_link, []}
-      }
+      },
+      {Registry, keys: :unique, name: LiveDashboardHistory.Registry}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
