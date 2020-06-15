@@ -8,26 +8,37 @@ defmodule LiveDashboardHistory.HistorySupervisor do
     {:ok, pid} = DynamicSupervisor.start_link(__MODULE__, :ok, name: __MODULE__)
     config = Application.get_env(:live_dashboard_history, LiveDashboardHistory)
 
-    # sample_config =
-    #   config
-    #   |> List.wrap()
-    #   |> List.first()
+    config_state =
+      case config do
+        nil -> {:error, :no_config}
+        [{:router, atom} | _] = good_config when is_atom(atom) -> {:ok, good_config}
+        [%{router: atom} | _] = good_config when is_atom(atom) -> {:ok, good_config}
+        _ -> {:error, :bad_config}
+      end
 
-    # is_nil(sample_config) or !sample_config[:router] or !sample_config[:metrics] do
-    if false do
-      Logger.warn("WARNING: router and metrics configuration required for live_dashboard_history")
-    else
+    with {:ok, raw_config} <- config_state,
+         map_list_config <- normalize_config(raw_config) do
       for %{
             router: router_module,
             metrics: metrics,
             buffer_size: buffer_size,
             skip_metrics: skip_metrics
-          } <- normalize_config(config) do
+          } <- map_list_config do
         history_metrics = get_metrics(metrics) -- skip_metrics
         start_child(history_metrics, buffer_size, router_module)
       end
 
       {:ok, pid}
+    else
+      {:error, :bad_config} ->
+        Logger.warn(
+          "WARNING: router and metrics config must be present for live_dashboard_history, router first if using keyword list"
+        )
+
+      {:error, :no_config} ->
+        Logger.warn(
+          "WARNING: router and metrics configuration required for live_dashboard_history"
+        )
     end
   end
 

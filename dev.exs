@@ -28,15 +28,6 @@ Application.put_env(:phoenix_live_dashboard, DemoWeb.Endpoint,
   ]
 )
 
-Application.put_env(:live_dashboard_history, LiveDashboardHistory,
-  router: DemoWeb.Router,
-  metrics: DemoWeb.Telemetry
-)
-|> IO.inspect(label: :put_env)
-
-Application.get_env(:live_dashboard_history, LiveDashboardHistory)
-|> IO.inspect(label: :get_env)
-
 defmodule DemoWeb.Telemetry do
   import Telemetry.Metrics
 
