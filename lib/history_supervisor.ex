@@ -27,8 +27,6 @@ defmodule LiveDashboardHistory.HistorySupervisor do
         history_metrics = get_metrics(metrics) -- skip_metrics
         start_child(history_metrics, buffer_size, router_module)
       end
-
-      {:ok, pid}
     else
       {:error, :bad_config} ->
         Logger.warn(
@@ -40,6 +38,8 @@ defmodule LiveDashboardHistory.HistorySupervisor do
           "WARNING: router and metrics configuration required for live_dashboard_history"
         )
     end
+
+    {:ok, pid}
   end
 
   defp get_metrics(metrics) when is_atom(metrics), do: apply(metrics, :metrics, [])
