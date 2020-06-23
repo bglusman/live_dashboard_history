@@ -3,6 +3,7 @@ defmodule LiveDashboardHistory.HistorySupervisor do
   require Logger
 
   @default_buffer_size 50
+  @default_buffer_type Cbuf.Queue
 
   def start_link() do
     {:ok, pid} = DynamicSupervisor.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -22,10 +23,11 @@ defmodule LiveDashboardHistory.HistorySupervisor do
             router: router_module,
             metrics: metrics,
             buffer_size: buffer_size,
+            buffer_type: buffer_type,
             skip_metrics: skip_metrics
           } <- map_list_config do
         history_metrics = get_metrics(metrics) -- skip_metrics
-        start_child(history_metrics, buffer_size, router_module)
+        start_child(history_metrics, buffer_size, buffer_type, router_module)
       end
     else
       {:error, :bad_config} ->
@@ -53,6 +55,7 @@ defmodule LiveDashboardHistory.HistorySupervisor do
         router: router,
         metrics: Keyword.fetch!(rest, :metrics),
         buffer_size: Keyword.get(rest, :buffer_size, @default_buffer_size),
+        buffer_type: Keyword.get(rest, :buffer_type, @default_buffer_type),
         skip_metrics: Keyword.get(rest, :skip_metrics, [])
       }
     ]
@@ -64,6 +67,7 @@ defmodule LiveDashboardHistory.HistorySupervisor do
         router: router,
         metrics: metrics,
         buffer_size: Map.get(current_config, :buffer_size, @default_buffer_size),
+        buffer_type: Map.get(current_config, :buffer_type, @default_buffer_type),
         skip_metrics: Map.get(current_config, :skip_metrics, [])
       }
     end
@@ -77,10 +81,10 @@ defmodule LiveDashboardHistory.HistorySupervisor do
     end
   end
 
-  defp start_child(metrics, buffer_size, router_module) do
+  defp start_child(metrics, buffer_size, buffer_type, router_module) do
     DynamicSupervisor.start_child(
       __MODULE__,
-      {LiveDashboardHistory, [metrics, buffer_size, router_module]}
+      {LiveDashboardHistory, [metrics, buffer_size, buffer_type, router_module]}
     )
   end
 

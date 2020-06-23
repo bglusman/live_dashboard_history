@@ -37,7 +37,17 @@ Assuming you only have one router in your Phoenix app (or only one you want to e
     metrics: MyAppWeb.Telemetry
 ```
 
-You may also pass optional arguments `:buffer_size` and/or `:skip_metrics`;  they default to 50 and `[]`.  `:buffer_size` configures how many of each telemetry event are saved for each metric. `:skip_metrics` allows you to save memory by filtering out metrics you don't care to have history available on in LiveDashboard.
+You may also pass optional arguments `:buffer_size`, `:buffer_type` and/or `:skip_metrics`
+
+* `buffer_size` defaults to 50
+* `buffer_type` defaults to  `Cbuf.Queue` 
+* `skip_metrics` defaults to `[]`
+  
+`:buffer_size` configures how many of each telemetry event are saved for each metric.  
+
+`:buffer_type` is the module used for inserting chart data and transforming current state back to a list.  It should implement the [Cbuf behavior](https://hexdocs.pm/cbuf/Cbuf.html) in theory, though in practice all that matters is that it implements `new/1`, `insert/2` and `to_list/1`.  `new/1` will recieve the buffer size specified above, and insert will receive each chart data point prepared as a map.  If you wished to store all chart data in Redis, for example, you could implement a module that does this, and returns as much data for each entry on `to_list/2` as desired based on your own logic, disregarding buffer_size.
+
+`:skip_metrics` allows you to save memory by filtering out metrics you don't care to have history available on in LiveDashboard.
 
 If you have multiple Routers and wish to expose LiveDashboard in each of them, you may pass in a list of maps instead of using a Keyword list as above, e.g.
 
@@ -53,7 +63,7 @@ If you have multiple Routers and wish to expose LiveDashboard in each of them, y
     }
   ]
 ```
-Each map may also have the optional keys `:buffer_size` and `:skip_metrics`
+Each map may also have the optional keys `:buffer_size`, `:buffer_type` and `:skip_metrics`
 <!-- MDOC !-->
 
 ## Contributing

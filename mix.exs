@@ -66,7 +66,7 @@ defmodule LiveDashboardHistory.MixProject do
       {:phoenix_live_dashboard,
        git: "https://github.com/bglusman/phoenix_live_dashboard.git",
        branch: "live_dashboard_history"},
-      {:circular_buffer, git: "https://github.com/keathley/circular_buffer.git"}
+      {:cbuf, "~> 0.7"}
     ]
   end
 end

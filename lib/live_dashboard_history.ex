@@ -12,16 +12,18 @@ defmodule LiveDashboardHistory do
     GenServer.call(process_name(router_module), {:data, metric})
   end
 
-  def start_link([metrics, buffer_size, router_module]) do
-    {:ok, pid} = GenServer.start_link(__MODULE__, [metrics, buffer_size, router_module])
+  def start_link([metrics, buffer_size, buffer_type, router_module]) do
+    {:ok, pid} =
+      GenServer.start_link(__MODULE__, [metrics, buffer_size, buffer_type, router_module])
+
     Process.register(pid, process_name(router_module))
     {:ok, pid}
   end
 
   defp process_name(router_module), do: :"#{router_module}History"
 
-  def init([metrics, buffer_size, router_module]) do
-    GenServer.cast(self(), {:metrics, metrics, buffer_size, router_module})
+  def init([metrics, buffer_size, buffer_type, router_module]) do
+    GenServer.cast(self(), {:metrics, metrics, buffer_size, buffer_type, router_module})
     {:ok, %{}}
   end
 
@@ -44,28 +46,28 @@ defmodule LiveDashboardHistory do
     end
   end
 
-  def handle_cast({:metrics, metrics, buffer_size, router_module}, _state) do
+  def handle_cast({:metrics, metrics, buffer_size, buffer_type, router_module}, _state) do
     metric_histories_map =
       metrics
       |> Enum.with_index()
       |> Enum.map(fn {metric, id} ->
         attach_handler(metric, id, router_module)
-        {metric, CircularBuffer.new(buffer_size)}
+        {metric, buffer_type.new(buffer_size)}
       end)
       |> Map.new()
 
-    {:noreply, metric_histories_map}
+    {:noreply, {buffer_type, metric_histories_map}}
   end
 
-  def handle_cast({:telemetry_metric, data, metric}, state) do
-    {:noreply, update_in(state[metric], &CircularBuffer.insert(&1, data))}
+  def handle_cast({:telemetry_metric, data, metric}, {buffer_type, state}) do
+    {:noreply, {buffer_type, update_in(state[metric], &buffer_type.insert(&1, data))}}
   end
 
-  def handle_call({:data, metric}, _from, state) do
+  def handle_call({:data, metric}, _from, {buffer_type, state}) do
     if history = state[metric] do
-      {:reply, CircularBuffer.to_list(history), state}
+      {:reply, buffer_type.to_list(history), {buffer_type, state}}
     else
-      {:reply, [], state}
+      {:reply, [], {buffer_type, state}}
     end
   end
 end
