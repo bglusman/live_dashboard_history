@@ -21,6 +21,6 @@ jobs:
     - name: Install Dependencies
       run: mix deps.get
     - name: Compile Workaround
-      run: mix deps.compile norm --force
+      run: MIX_ENV=test mix deps.compile norm --force
     - name: Run Tests
       run: mix test
