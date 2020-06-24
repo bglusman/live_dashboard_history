@@ -18,9 +18,8 @@ defmodule LiveDashboardHistoryTest do
 
     check all telemetry <- gen(telemetry_schema),
               metric_fn <- gen(metric_spec),
-              buffer <- gen(buffer_type),
-              # at the moment runs are parallel and can't support that yet
-              max_runs: 1 do
+              buffer <- gen(buffer_type) do
+      router = :"router_#{System.monotonic_time()}"
       measures = Map.keys(telemetry.measurement)
 
       metrics =
@@ -28,13 +27,8 @@ defmodule LiveDashboardHistoryTest do
           apply(Telemetry.Metrics, metric_fn, ["#{Enum.join(telemetry.name, ".")}.#{measure}"])
         end)
 
-      Application.put_env(:live_dashboard_history, LiveDashboardHistory,
-        router: :router,
-        metrics: fn -> metrics end,
-        buffer_type: buffer
-      )
+      {:ok, _pid} = LiveDashboardHistory.HistorySupervisor.start_child(metrics, 5, buffer, router)
 
-      {:ok, pid} = LiveDashboardHistory.HistorySupervisor.start_link()
       # allow time for handle_cast({:metrics, ...})
       Process.sleep(@cast_sleep_length)
       :telemetry.execute(telemetry.name, telemetry.measurement, %{})
@@ -42,10 +36,8 @@ defmodule LiveDashboardHistoryTest do
       Process.sleep(@cast_sleep_length)
 
       Enum.map(metrics, fn metric ->
-        assert LiveDashboardHistory.metrics_history(metric, :router) != []
+        assert LiveDashboardHistory.metrics_history(metric, router) != []
       end)
-
-      Process.exit(pid, :kill)
     end
   end
 end
