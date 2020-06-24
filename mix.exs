@@ -68,7 +68,7 @@ defmodule LiveDashboardHistory.MixProject do
        git: "https://github.com/bglusman/phoenix_live_dashboard.git",
        branch: "live_dashboard_history"},
       {:cbuf, "~> 0.7"},
-      {:norm, "~> 0.12", only: [:test]},
+      {:norm, git: "https://github.com/keathley/norm.git", only: [:test]},
       {:stream_data, "~> 0.5", only: [:test]}
     ]
   end

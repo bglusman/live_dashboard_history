@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: mix test (OTP ${{matrix.otp}} | Elixir ${{matrix.elixir}})
+    strategy:
+      matrix:
+        otp: [21.x, 22.x]
+        elixir: [1.8.x, 1.9.x, 1.10.x]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-elixir@v1
+      with:
+        otp-version: ${{matrix.otp}}
+        elixir-version: ${{matrix.elixir}}
+    - name: Install Dependencies
+      run: mix deps.get
+    - name: Run Tests
+      run: mix test
