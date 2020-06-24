@@ -49,6 +49,9 @@ defmodule LiveDashboardHistory.HistorySupervisor do
   defp get_metrics({metrics, function}) when is_atom(metrics) and is_atom(function),
     do: apply(metrics, function, [])
 
+  defp get_metrics(metrics_fn) when is_function(metrics_fn),
+    do: metrics_fn.()
+
   defp normalize_config([{:router, router} | rest]) do
     [
       %{

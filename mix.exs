@@ -40,7 +40,8 @@ defmodule LiveDashboardHistory.MixProject do
       setup: ["deps.get", "cmd npm install --prefix assets"],
       no_halt: "run --no-halt dev.exs",
       put_config: &put_config/1,
-      dev: ["put_config", "no_halt"]
+      dev: ["put_config", "no_halt"],
+      test: "test --no-start"
     ]
   end
 
@@ -66,7 +67,9 @@ defmodule LiveDashboardHistory.MixProject do
       {:phoenix_live_dashboard,
        git: "https://github.com/bglusman/phoenix_live_dashboard.git",
        branch: "live_dashboard_history"},
-      {:cbuf, "~> 0.7"}
+      {:cbuf, "~> 0.7"},
+      {:norm, "~> 0.12", only: [:test]},
+      {:stream_data, "~> 0.5", only: [:test]}
     ]
   end
 end
