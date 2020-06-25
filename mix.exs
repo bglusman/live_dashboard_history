@@ -40,8 +40,7 @@ defmodule LiveDashboardHistory.MixProject do
       setup: ["deps.get", "cmd npm install --prefix assets"],
       no_halt: "run --no-halt dev.exs",
       put_config: &put_config/1,
-      dev: ["put_config", "no_halt"],
-      test: "test --no-start"
+      dev: ["put_config", "no_halt"]
     ]
   end
 
