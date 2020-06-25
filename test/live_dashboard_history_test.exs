@@ -8,7 +8,11 @@ defmodule LiveDashboardHistoryTest do
   property "events are recorded" do
     telemetry_schema =
       schema(%{
-        name: coll_of(spec(is_atom()), min_count: 2, max_count: 5),
+        name:
+          coll_of(spec(is_atom() and fn atom -> !Regex.match?(~r/\./, to_string(atom)) end),
+            min_count: 2,
+            max_count: 5
+          ),
         measurement: map_of(spec(is_atom()), spec(is_number()), min_count: 1, max_count: 3)
       })
 
@@ -16,9 +20,11 @@ defmodule LiveDashboardHistoryTest do
 
     buffer_type = one_of([Cbuf.Queue, Cbuf.ETS, Cbuf.Map])
 
-    check all telemetry <- gen(telemetry_schema),
-              metric_fn <- gen(metric_spec),
-              buffer <- gen(buffer_type) do
+    check all(
+            telemetry <- gen(telemetry_schema),
+            metric_fn <- gen(metric_spec),
+            buffer <- gen(buffer_type)
+          ) do
       router = :"router_#{System.monotonic_time()}"
       measures = Map.keys(telemetry.measurement)
 
