@@ -4,6 +4,7 @@ defmodule LiveDashboardHistory.HistorySupervisor do
 
   @default_buffer_size 50
   @default_buffer_type Cbuf.Queue
+  @env Mix.env()
 
   def start_link() do
     {:ok, pid} = DynamicSupervisor.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -31,14 +32,18 @@ defmodule LiveDashboardHistory.HistorySupervisor do
       end
     else
       {:error, :bad_config} ->
-        Logger.warn(
-          "WARNING: router and metrics config must be present for live_dashboard_history, router first if using keyword list"
-        )
+        unless @env == :test do
+          Logger.warn(
+            "WARNING: router and metrics config must be present for live_dashboard_history, router first if using keyword list"
+          )
+        end
 
       {:error, :no_config} ->
-        Logger.warn(
-          "WARNING: router and metrics configuration required for live_dashboard_history"
-        )
+        unless @env == :test do
+          Logger.warn(
+            "WARNING: router and metrics configuration required for live_dashboard_history"
+          )
+        end
     end
 
     {:ok, pid}
@@ -48,6 +53,9 @@ defmodule LiveDashboardHistory.HistorySupervisor do
 
   defp get_metrics({metrics, function}) when is_atom(metrics) and is_atom(function),
     do: apply(metrics, function, [])
+
+  defp get_metrics(metrics_fn) when is_function(metrics_fn),
+    do: metrics_fn.()
 
   defp normalize_config([{:router, router} | rest]) do
     [
@@ -81,7 +89,7 @@ defmodule LiveDashboardHistory.HistorySupervisor do
     end
   end
 
-  defp start_child(metrics, buffer_size, buffer_type, router_module) do
+  def start_child(metrics, buffer_size, buffer_type, router_module) do
     DynamicSupervisor.start_child(
       __MODULE__,
       {LiveDashboardHistory, [metrics, buffer_size, buffer_type, router_module]}
