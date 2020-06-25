@@ -9,18 +9,26 @@ defmodule LiveDashboardHistory do
   alias Phoenix.LiveDashboard.TelemetryListener
 
   def metrics_history(metric, router_module) do
-    GenServer.call(process_name(router_module), {:data, metric})
+    case process_id(router_module) do
+      nil -> []
+      pid -> GenServer.call(pid, {:data, metric})
+    end
   end
 
   def start_link([metrics, buffer_size, buffer_type, router_module]) do
     {:ok, pid} =
       GenServer.start_link(__MODULE__, [metrics, buffer_size, buffer_type, router_module])
 
-    Process.register(pid, process_name(router_module))
+    Registry.register(LiveDashboardHistory.Registry, router_module, pid)
     {:ok, pid}
   end
 
-  defp process_name(router_module), do: :"#{router_module}History"
+  defp process_id(router_module) do
+    case Registry.lookup(LiveDashboardHistory.Registry, router_module) do
+      [{_supervisor_pid, child_pid}] -> child_pid
+      [] -> nil
+    end
+  end
 
   def init([metrics, buffer_size, buffer_type, router_module]) do
     GenServer.cast(self(), {:metrics, metrics, buffer_size, buffer_type, router_module})
@@ -42,7 +50,13 @@ defmodule LiveDashboardHistory do
 
   def handle_event(_event_name, data, metadata, {metric, router_module}) do
     if data = TelemetryListener.prepare_entry(metric, data, metadata) do
-      GenServer.cast(process_name(router_module), {:telemetry_metric, data, metric})
+      case process_id(router_module) do
+        nil ->
+          :noop
+
+        pid ->
+          GenServer.cast(pid, {:telemetry_metric, data, metric})
+      end
     end
   end
 
