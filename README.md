@@ -3,6 +3,8 @@
 <!-- MDOC !-->
 Storage and integration layer to add recent metrics history on each client connection to Phoenix LiveDashboard
 
+![](https://github.com/bglusman/live_dashboard_history/workflows/CI/badge.svg)
+
 LiveDashboard provides real-time performance monitoring and debugging tools for Phoenix developers. [See their docs here](https://hexdocs.pm/phoenix_live_dashboard)
 for details on using and configuring it in general, but if you're using it or know how, and want to have recent history for metrics charts, this library provides an ephemeral storage mechanism and integration with (a fork of, for now) Phoenix LiveDashboard.  (once the fork, which provides a hook to allow providing history, is merged and released via Hex.pm, this library should be updated to not rely on fork and to work with any version of LiveDashboard after that.  Until then, this library relies on the fork and you should remove or comment any explicit dependency on `phoenix_live_dashboard` in your `mix.exs` and only rely on this library).
 
