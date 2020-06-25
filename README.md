@@ -22,13 +22,14 @@ end
 
 ## Configuration
 
-Only two pieces of configuration are needed;  First, in each router you wish to expose live_dashboard, follow the normal guidelines for configuration like so:
+Only two pieces of configuration are needed; first, in each router you wish to expose live_dashboard, follow the normal guidelines for configuration like so:
 
 ```elixir
 live_dashboard "/dashboard",
     metrics: MyAppWeb.Telemetry,
     metrics_history: {LiveDashboardHistory, :metrics_history, [__MODULE__]}
 ```
+(you may also pass in `:env_keys` and/or `:live_socket_path` config if you wish, but `:metrics` and `:metrics_history` are the minimum config that make sense with this library)
 
 Assuming you only have one router in your Phoenix app (or only one you want to expose LiveDashboard with history in), you can then add config into your `config.exs` like so:
 ```
@@ -36,6 +37,9 @@ Assuming you only have one router in your Phoenix app (or only one you want to e
     router: MyAppWeb.Router,
     metrics: MyAppWeb.Telemetry
 ```
+The router argument must come before metrics in config (when using a keyword list), and must evaluate to the same module as `__MODULE__` in the router where live_dashboard is configured.
+
+The metrics argument may match the metrics argument passed in live_dashboard configuration, a module as above, a tuple of `{module, function}`, or you may also pass an inline 0-arity anonymous function directly in config which must return metrics.
 
 You may also pass optional arguments `:buffer_size`, `:buffer_type` and/or `:skip_metrics`
 
@@ -47,7 +51,7 @@ You may also pass optional arguments `:buffer_size`, `:buffer_type` and/or `:ski
 
 `:buffer_type` is the module used for inserting chart data and transforming current state back to a list.  It should implement the [Cbuf behavior](https://hexdocs.pm/cbuf/Cbuf.html) in theory, though in practice all that matters is that it implements `new/1`, `insert/2` and `to_list/1`.  `new/1` will recieve the buffer size specified above, and insert will receive each chart data point prepared as a map.  If you wished to store all chart data in Redis, for example, you could implement a module that does this, and returns as much data for each entry on `to_list/2` as desired based on your own logic, disregarding buffer_size.
 
-`:skip_metrics` allows you to save memory by filtering out metrics you don't care to have history available on in LiveDashboard.
+`:skip_metrics` allows you to save memory by filtering out metrics you don't care to have history available on in LiveDashboard.  You may also just use a different metrics function than the one passed to live_dashboard config that returns only the metrics for which you wish to retain history.
 
 If you have multiple Routers and wish to expose LiveDashboard in each of them, you may pass in a list of maps instead of using a Keyword list as above, e.g.
 
@@ -63,7 +67,7 @@ If you have multiple Routers and wish to expose LiveDashboard in each of them, y
     }
   ]
 ```
-Each map may also have the optional keys `:buffer_size`, `:buffer_type` and `:skip_metrics`
+Each map may also have the optional keys `:buffer_size`, `:buffer_type` and `:skip_metrics`, and each metrics key may take any of the values outlines above.
 <!-- MDOC !-->
 
 ## Contributing
