@@ -6,7 +6,7 @@ defmodule LiveDashboardHistory do
              |> Enum.fetch!(1)
 
   use GenServer
-  alias Phoenix.LiveDashboard.TelemetryListener
+  alias Phoenix.LiveDashboard
 
   def metrics_history(metric, router_module) do
     case process_id(router_module) do
@@ -49,7 +49,7 @@ defmodule LiveDashboardHistory do
   end
 
   def handle_event(_event_name, data, metadata, {metric, router_module}) do
-    if data = TelemetryListener.prepare_entry(metric, data, metadata) do
+    if data = LiveDashboard.extract_datapoint_for_metric(metric, data, metadata) do
       case process_id(router_module) do
         nil ->
           :noop
