@@ -65,6 +65,7 @@ defmodule LiveDashboardHistory.MixProject do
     [
       {:phoenix_live_dashboard, "~> 0.2.7"},
       {:cbuf, "~> 0.7"},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:norm, git: "https://github.com/keathley/norm.git", only: [:test]},
       {:stream_data, "~> 0.5", only: [:test]}
     ]
