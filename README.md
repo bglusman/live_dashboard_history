@@ -11,8 +11,7 @@ for details on using and configuring it in general, but if you're using it or kn
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `live_dashboard_history` to your list of dependencies in `mix.exs`:
+The package can be installed via hex.pm by adding `live_dashboard_history` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
