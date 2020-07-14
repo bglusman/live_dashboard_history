@@ -107,7 +107,7 @@ defmodule DemoWeb.Router do
     live_dashboard("/dashboard",
       metrics: DemoWeb.Telemetry,
       env_keys: ["USER", "ROOTDIR"],
-      metrics_history: {LiveDashboardHistory, :data, [__MODULE__]}
+      metrics_history: {LiveDashboardHistory, :metrics_history, [__MODULE__]}
     )
   end
 end
@@ -118,7 +118,6 @@ defmodule DemoWeb.Endpoint do
   socket("/live", Phoenix.LiveView.Socket)
   socket("/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket)
 
-  plug(Phoenix.LiveReloader)
   plug(Phoenix.CodeReloader)
 
   plug(Phoenix.LiveDashboard.RequestLogger,
@@ -137,10 +136,27 @@ defmodule DemoWeb.Endpoint do
   plug(DemoWeb.Router)
 end
 
-Application.ensure_all_started(:os_mon)
-Application.put_env(:phoenix, :serve_endpoints, true)
-
 Task.start(fn ->
+  # Configures the endpoint
+  Application.put_env(:phoenix_live_dashboard, DemoWeb.Endpoint,
+    url: [host: "localhost"],
+    secret_key_base: "Hu4qQN3iKzTV4fJxhorPQlA/osH9fAMtbtjVS58PFgfw3ja5Z18Q/WSNR9wP4OfW",
+    live_view: [signing_salt: "hMegieSe"],
+    http: [port: System.get_env("PORT") || 4001],
+    debug_errors: true,
+    check_origin: false,
+    pubsub_server: Demo.PubSub
+  )
+
+  Application.put_env(:phoenix, :serve_endpoints, true)
+  Application.put_env(:phoenix, :json_library, Jason)
+  Application.ensure_all_started(:os_mon, :phoenix_live_dashboard)
+
+  Application.put_env(:live_dashboard_history, LiveDashboardHistory,
+    router: DemoWeb.Router,
+    metrics: DemoWeb.Telemetry
+  )
+
   children = [
     {Phoenix.PubSub, [name: Demo.PubSub, adapter: Phoenix.PubSub.PG2]},
     DemoWeb.Endpoint,

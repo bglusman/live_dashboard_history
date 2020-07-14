@@ -37,10 +37,7 @@ defmodule LiveDashboardHistory.MixProject do
 
   defp aliases do
     [
-      setup: ["deps.get", "cmd npm install --prefix assets"],
-      no_halt: "run --no-halt dev.exs",
-      put_config: &put_config/1,
-      dev: ["put_config", "no_halt"]
+      dev: "run --no-start --no-halt dev.exs"
     ]
   end
 
@@ -53,18 +50,12 @@ defmodule LiveDashboardHistory.MixProject do
     ]
   end
 
-  defp put_config(_) do
-    Application.put_env(:live_dashboard_history, LiveDashboardHistory,
-      router: DemoWeb.Router,
-      metrics: DemoWeb.Telemetry
-    )
-  end
-
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:phoenix_live_dashboard, "~> 0.2.7"},
       {:cbuf, "~> 0.7"},
+      {:jason, "~> 1.2", only: :dev},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:norm, git: "https://github.com/keathley/norm.git", only: [:test]},
       {:stream_data, "~> 0.5", only: [:test]}
