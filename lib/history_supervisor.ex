@@ -10,15 +10,7 @@ defmodule LiveDashboardHistory.HistorySupervisor do
     {:ok, pid} = DynamicSupervisor.start_link(__MODULE__, :ok, name: __MODULE__)
     config = Application.get_env(:live_dashboard_history, LiveDashboardHistory)
 
-    config_state =
-      case config do
-        nil -> {:error, :no_config}
-        [{:router, atom} | _] = good_config when is_atom(atom) -> {:ok, good_config}
-        [%{router: atom} | _] = good_config when is_atom(atom) -> {:ok, good_config}
-        _ -> {:error, :bad_config}
-      end
-
-    with {:ok, raw_config} <- config_state,
+    with {:ok, raw_config} <- config_state(config),
          map_list_config <- normalize_config(raw_config) do
       for %{
             router: router_module,
@@ -49,6 +41,31 @@ defmodule LiveDashboardHistory.HistorySupervisor do
     {:ok, pid}
   end
 
+  def config_state(config) do
+    case config do
+      nil -> {:error, :no_config}
+      [tuple | _] when is_tuple(tuple) -> validate(config, :tuple)
+      [map | _] when is_map(map) -> validate(config, :map)
+      _ -> {:error, :bad_config}
+    end
+  end
+
+  def validate(config, :tuple) do
+    if Keyword.has_key?(config, :router) and Keyword.has_key?(config, :metrics) do
+      {:ok, config}
+    else
+      {:error, :bad_config}
+    end
+  end
+
+  def validate(config, :map) do
+    if Enum.all?(config, fn map -> Map.has_key?(map, :router) and Map.has_key?(map, :metrics) end) do
+      {:ok, config}
+    else
+      {:error, :bad_config}
+    end
+  end
+
   defp get_metrics(metrics) when is_atom(metrics), do: apply(metrics, :metrics, [])
 
   defp get_metrics({metrics, function}) when is_atom(metrics) and is_atom(function),
@@ -57,14 +74,14 @@ defmodule LiveDashboardHistory.HistorySupervisor do
   defp get_metrics(metrics_fn) when is_function(metrics_fn),
     do: metrics_fn.()
 
-  defp normalize_config([{:router, router} | rest]) do
+  defp normalize_config([tuple | _rest] = config) when is_tuple(tuple) do
     [
       %{
-        router: router,
-        metrics: Keyword.fetch!(rest, :metrics),
-        buffer_size: Keyword.get(rest, :buffer_size, @default_buffer_size),
-        buffer_type: Keyword.get(rest, :buffer_type, @default_buffer_type),
-        skip_metrics: Keyword.get(rest, :skip_metrics, [])
+        router: Keyword.fetch!(config, :router),
+        metrics: Keyword.fetch!(config, :metrics),
+        buffer_size: Keyword.get(config, :buffer_size, @default_buffer_size),
+        buffer_type: Keyword.get(config, :buffer_type, @default_buffer_type),
+        skip_metrics: Keyword.get(config, :skip_metrics, [])
       }
     ]
   end

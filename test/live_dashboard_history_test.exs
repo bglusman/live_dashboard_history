@@ -4,6 +4,24 @@ defmodule LiveDashboardHistoryTest do
 
   import Norm
 
+  alias LiveDashboardHistory.HistorySupervisor
+
+  test "config validation" do
+    assert HistorySupervisor.config_state(router: Router, metrics: Metrics) ==
+             {:ok, [router: Router, metrics: Metrics]}
+
+    assert HistorySupervisor.config_state([%{router: Router, metrics: Metrics}]) ==
+             {:ok, [%{router: Router, metrics: Metrics}]}
+  end
+
+  test "config errors" do
+    assert HistorySupervisor.config_state(rotuer: Router, metrics: Metrics) ==
+             {:error, :bad_config}
+
+    assert HistorySupervisor.config_state([%{router: Router, metics: Metrics}]) ==
+             {:error, :bad_config}
+  end
+
   @cast_sleep_length 5
   property "events are recorded" do
     telemetry_schema =

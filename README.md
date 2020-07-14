@@ -39,7 +39,7 @@ Assuming you only have one router in your Phoenix app (or only one you want to e
     router: MyAppWeb.Router,
     metrics: MyAppWeb.Telemetry
 ```
-The router argument must come before metrics in config (when using a keyword list), and must evaluate to the same module as `__MODULE__` in the router where live_dashboard is configured.
+The router argument must evaluate to the same module as `__MODULE__` in the router where live_dashboard is configured.
 
 The metrics argument may match the metrics argument passed in live_dashboard configuration, a module as above, a tuple of `{module, function}`, or you may also pass an inline 0-arity anonymous function directly in config which must return metrics.
 
