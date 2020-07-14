@@ -65,7 +65,7 @@ If you have multiple Routers and wish to expose LiveDashboard in each of them, y
     },
     %{
       router: MyAppWeb.Router2,
-      metrics: MyAppWeb.Telemetry2},
+      metrics: MyAppWeb.Telemetry2,
     }
   ]
 ```
