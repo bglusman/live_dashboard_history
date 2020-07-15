@@ -1,12 +1,13 @@
 defmodule LiveDashboardHistory.MixProject do
   use Mix.Project
-  @version "0.1.2"
+  @version "0.1.3"
 
   def project do
     [
       app: :live_dashboard_history,
       version: @version,
       elixir: "~> 1.7",
+      compilers: [:phoenix] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       name: "LiveDashboardHistory",
