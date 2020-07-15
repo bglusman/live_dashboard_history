@@ -8,11 +8,11 @@ defmodule LiveDashboardHistory.Application do
     children = [
       # Starts a worker by calling: Podder.Worker.start_link(arg)
       # {Podder.Worker, arg},
+      {Registry, keys: :unique, name: LiveDashboardHistory.Registry},
       %{
         id: HistorySupervisor,
         start: {HistorySupervisor, :start_link, []}
-      },
-      {Registry, keys: :unique, name: LiveDashboardHistory.Registry}
+      }
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
