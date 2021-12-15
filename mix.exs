@@ -64,7 +64,7 @@ defmodule LiveDashboardHistory.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:phoenix_live_dashboard, "~> 0.2.7"},
+      {:phoenix_live_dashboard, "~> 0.6"},
       {:cbuf, "~> 0.7"},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:norm, git: "https://github.com/keathley/norm.git", only: [:test]},
