@@ -1,5 +1,7 @@
 defmodule LiveDashboardHistory.MixProject do
   use Mix.Project
+
+  @source_url "http://github.com/bglusman/live_dashboard_history"
   @version "0.1.4"
 
   def project do
@@ -13,7 +15,6 @@ defmodule LiveDashboardHistory.MixProject do
       name: "LiveDashboardHistory",
       docs: docs(),
       package: package(),
-      homepage_url: "http://github.com/bglusman/live_dashboard_history",
       description: "Ephemeral metrics history storage for Phoenix LiveDashboard",
       deps: deps()
     ]
@@ -29,10 +30,17 @@ defmodule LiveDashboardHistory.MixProject do
 
   defp docs do
     [
-      main: "LiveDashboardHistory",
+      extras: [
+        "LICENSE.md": [title: "License"],
+        "README.md": [title: "Overview"]
+      ],
+      main: "readme",
+      homepage_url: @source_url,
       source_ref: "v#{@version}",
-      source_url: "https://github.com/bglusman/live_dashboard_history",
-      nest_modules_by_prefix: [LiveDashboardHistory]
+      source_url: @source_url,
+      nest_modules_by_prefix: [LiveDashboardHistory],
+      formatters: ["html"],
+      api_reference: false
     ]
   end
 
