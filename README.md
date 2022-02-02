@@ -1,10 +1,14 @@
 # LiveDashboardHistory
 
+[![CI](https://github.com/bglusman/live_dashboard_history/actions/workflows/ci.yml/badge.svg)](https://github.com/bglusman/live_dashboard_history/actions/workflows/ci.yml)
+[![Hex Version](https://img.shields.io/hexpm/v/live_dashboard_history.svg)](https://hex.pm/packages/live_dashboard_history)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen.svg)](https://hexdocs.pm/live_dashboard_history/)
+[![Total Download](https://img.shields.io/hexpm/dt/live_dashboard_history.svg)](https://hex.pm/packages/live_dashboard_history)
+[![License](https://img.shields.io/hexpm/l/live_dashboard_history.svg)](https://github.com/bglusman/live_dashboard_history/blob/master/LICENSE)
+[![Last Updated](https://img.shields.io/github/last-commit/bglusman/live_dashboard_history.svg)](https://github.com/bglusman/live_dashboard_history/commits/master)
+
 <!-- MDOC !-->
 Storage and integration layer to add recent metrics history on each client connection to Phoenix LiveDashboard
-
-![](https://github.com/bglusman/live_dashboard_history/workflows/CI/badge.svg)
-[![Hex.pm](https://img.shields.io/hexpm/v/live_dashboard_history.svg)](https://hex.pm/packages/live_dashboard_history)
 
 LiveDashboard provides real-time performance monitoring and debugging tools for Phoenix developers. [See their docs here](https://hexdocs.pm/phoenix_live_dashboard)
 for details on using and configuring it in general, but if you're using it or know how, and want to have recent history for metrics charts, this library provides an ephemeral storage mechanism and integration with (a fork of, for now) Phoenix LiveDashboard.  (once the fork, which provides a hook to allow providing history, is merged and released via Hex.pm, this library should be updated to not rely on fork and to work with any version of LiveDashboard after that.  Until then, this library relies on the fork and you should remove or comment any explicit dependency on `phoenix_live_dashboard` in your `mix.exs` and only rely on this library).
@@ -35,10 +39,11 @@ live_dashboard "/dashboard",
 (you may also pass in `:env_keys` and/or `:live_socket_path` config if you wish, but `:metrics` and `:metrics_history` are the minimum config that make sense with this library)
 
 Assuming you only have one router in your Phoenix app (or only one you want to expose LiveDashboard with history in), you can then add config into your `config.exs` like so:
-```
-  config :live_dashboard_history, LiveDashboardHistory,
-    router: MyAppWeb.Router,
-    metrics: MyAppWeb.Telemetry
+
+```elixir
+config :live_dashboard_history, LiveDashboardHistory,
+  router: MyAppWeb.Router,
+  metrics: MyAppWeb.Telemetry
 ```
 The router argument must evaluate to the same module as `__MODULE__` in the router where live_dashboard is configured.
 
@@ -47,10 +52,10 @@ The metrics argument may match the metrics argument passed in live_dashboard con
 You may also pass optional arguments `:buffer_size`, `:buffer_type` and/or `:skip_metrics`
 
 * `buffer_size` defaults to 50
-* `buffer_type` defaults to  `Cbuf.Queue` 
+* `buffer_type` defaults to  `Cbuf.Queue`
 * `skip_metrics` defaults to `[]`
-  
-`:buffer_size` configures how many of each telemetry event are saved for each metric.  
+
+`:buffer_size` configures how many of each telemetry event are saved for each metric.
 
 `:buffer_type` is the module used for inserting chart data and transforming current state back to a list.  It should implement the [Cbuf behavior](https://hexdocs.pm/cbuf/Cbuf.html) in theory, though in practice all that matters is that it implements `new/1`, `insert/2` and `to_list/1`.  `new/1` will recieve the buffer size specified above, and insert will receive each chart data point prepared as a map.  If you wished to store all chart data in Redis, for example, you could implement a module that does this, and returns as much data for each entry on `to_list/2` as desired based on your own logic, disregarding buffer_size.
 
@@ -58,17 +63,17 @@ You may also pass optional arguments `:buffer_size`, `:buffer_type` and/or `:ski
 
 If you have multiple Routers and wish to expose LiveDashboard in each of them, you may pass in a list of maps instead of using a Keyword list as above, e.g.
 
-```
-  config :live_dashboard_history, LiveDashboardHistory, [
-    %{
-      router: MyAppWeb.Router1,
-      metrics: MyAppWeb.Telemetry1
-    },
-    %{
-      router: MyAppWeb.Router2,
-      metrics: MyAppWeb.Telemetry2,
-    }
-  ]
+```elixir
+config :live_dashboard_history, LiveDashboardHistory, [
+  %{
+    router: MyAppWeb.Router1,
+    metrics: MyAppWeb.Telemetry1
+  },
+  %{
+    router: MyAppWeb.Router2,
+    metrics: MyAppWeb.Telemetry2,
+  }
+]
 ```
 Each map may also have the optional keys `:buffer_size`, `:buffer_type` and `:skip_metrics`, and each metrics key may take any of the values outlines above.
 <!-- MDOC !-->
@@ -82,7 +87,9 @@ For those planning to contribute to this project, you can run a dev version of t
 
 Alternatively, run `iex -S mix dev` if you also want a shell.
 
-## License
+## Copyright and License
 
-MIT License. Copyright (c) 2020 Brian Glusman.
+Copyright (c) 2020 Brian Glusman.
 
+This work is free. You can redistribute it and/or modify it under the
+terms of the MIT License. See the [LICENSE.md](./LICENSE.md) file for more details.
