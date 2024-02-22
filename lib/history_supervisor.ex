@@ -25,14 +25,14 @@ defmodule LiveDashboardHistory.HistorySupervisor do
     else
       {:error, :bad_config} ->
         unless @env == :test do
-          Logger.warn(
+          Logger.warning(
             "WARNING: router and metrics config must be present for live_dashboard_history, router first if using keyword list"
           )
         end
 
       {:error, :no_config} ->
         unless @env == :test do
-          Logger.warn(
+          Logger.warning(
             "WARNING: router and metrics configuration required for live_dashboard_history"
           )
         end
