@@ -7,7 +7,6 @@ defmodule LiveDashboardHistory.MixProject do
       app: :live_dashboard_history,
       version: @version,
       elixir: "~> 1.11",
-      compilers: [:phoenix] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       name: "LiveDashboardHistory",
